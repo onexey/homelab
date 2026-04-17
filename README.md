@@ -1,4 +1,4 @@
-# mssrv-docker
+# Home Server Docker
 
 Docker Compose files for my home servers.
 
