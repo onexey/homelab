@@ -1,0 +1,147 @@
+name: ms-srv
+
+# Node 2 services
+#
+# This file combines the previous dev-stack and better-home stacks so
+# applications can depend on local databases without cross-project wiring.
+services:
+  redis:
+    image: redis/redis-stack-server:latest
+    restart: unless-stopped
+    container_name: Redis
+    ports:
+      - "6379:6379"
+    stdin_open: true
+    tty: true
+
+  mssql2022:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    user: root
+    restart: unless-stopped
+    container_name: MSSQL2022
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - ${DataRootPath:-.}/data/mssql/2022:/var/opt/mssql/data
+
+  mssql2025:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    user: root
+    restart: unless-stopped
+    container_name: MSSQL2025
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_PASSWORD}
+    ports:
+      - "1434:1433"
+    volumes:
+      - ${DataRootPath:-.}/data/mssql/2025:/var/opt/mssql/data
+
+  mssql2025preview:
+    image: mcr.microsoft.com/mssql/server:2025-RC0-ubuntu-24.04
+    user: root
+    restart: unless-stopped
+    container_name: MSSQL2025Preview
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_PASSWORD}
+    ports:
+      - "1435:1433"
+    volumes:
+      - ${DataRootPath:-.}/data/mssql/2025Preview:/var/opt/mssql/data
+
+  postgresql:
+    image: postgres:latest
+    restart: unless-stopped
+    container_name: PostgreSQL
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      start_period: 30s
+    volumes:
+      - ${DataRootPath:-.}/data/postgresql:/var/lib/postgresql/data
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      - PUID=1000
+      - PGID=999 # docker group id
+      - HOMEPAGE_ALLOWED_HOSTS=home.soylu.uk
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${DataRootPath:-.}/config/homepage:/app/config # Make sure your local config directory exists
+      - /var/run/docker.sock:/var/run/docker.sock:ro # optional, for docker integrations
+    restart: unless-stopped
+
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "${InternalIP:-}:53:53/tcp"
+      - "${InternalIP:-}:53:53/udp"
+      - "8081:80/tcp"
+    environment:
+      TZ: "Central European Time"
+      WEBPASSWORD: "${WebPassword:-}"
+    volumes:
+      - "${DataRootPath:-.}/config/pihole/etc-pihole:/etc/pihole"
+      - "${DataRootPath:-.}/config/pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
+    restart: unless-stopped
+
+  caddy:
+    build:
+      context: .
+      dockerfile: CaddyCloudflareDockerfile
+    container_name: caddy
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - CF_API_TOKEN
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ${DataRootPath:-.}/config/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ${DataRootPath:-.}/config/caddy/site:/srv
+      - ${DataRootPath:-.}/config/caddy/data:/data
+      - ${DataRootPath:-.}/config/caddy/config:/config
+
+  homebox:
+    image: ghcr.io/sysadminsmedia/homebox:latest
+    container_name: homebox
+    environment:
+      TZ: "Central European Time"
+    ports:
+      - "3100:7745"
+    volumes:
+      - ${DataRootPath:-.}/config/homebox/data:/data
+    restart: unless-stopped
+
+  instakindle:
+    image: ghcr.io/onexey/instakindle:latest
+    container_name: instakindle
+    restart: unless-stopped
+    environment:
+      INSTAPAPER_KEY: ${INSTAPAPER_KEY}
+      INSTAPAPER_SECRET: ${INSTAPAPER_SECRET}
+      INSTAPAPER_USERNAME: ${INSTAPAPER_USERNAME}
+      INSTAPAPER_PASSWORD: ${INSTAPAPER_PASSWORD}
+      KINDLE_EMAIL: ${KINDLE_EMAIL}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SENDER_EMAIL: ${SENDER_EMAIL}
+      POLL_INTERVAL: ${POLL_INTERVAL:-900}
+      LOG_LEVEL: ${LOG_LEVEL:-info}

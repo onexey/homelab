@@ -1,3 +1,5 @@
+name: ms-nas
+
 # Entertainment services
 services:
   qbittorrent:
@@ -42,7 +44,6 @@ services:
       - PGID=950
       - TZ=CET
       - AUTO_UPDATE=true #optional
-      - RUN_OPTS=<run options here> #optional
     volumes:
       - ${DataRootPath:-.}/jackett/config:/config
       - ${MediaRootPath:-.}/downloads:/downloads

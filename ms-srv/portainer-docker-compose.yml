@@ -1,3 +1,5 @@
+name: ms-srv-portainer
+
 # Portainer for docker management
 
 services:
@@ -10,7 +12,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - ../config/portainer:/data
+      - ${DataRootPath:-.}/config/portainer:/data
     ports:
       - 9000:9000
       - 8000:8000
