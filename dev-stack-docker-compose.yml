@@ -56,5 +56,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "miniflux"]
+      interval: 10s
+      start_period: 30s
     volumes:
       - ${DataRootPath:-.}/data/postgresql:/var/lib/postgresql/data 
