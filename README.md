@@ -10,7 +10,7 @@ Docker Compose files for my home servers.
 - `ms-srv/`
   - Main server stack in `ms-srv/docker-compose.yml`
   - Portainer stack in `ms-srv/portainer-docker-compose.yml`
-  - Services: Homepage, Pi-hole, Caddy, Homebox, InstaKindle, Redis, SQL Server, PostgreSQL, Miniflux
+  - Services: Homepage, Pi-hole, Caddy, Homebox, InstaKindle, FeedTriage, Redis, SQL Server, PostgreSQL, Miniflux
   - Helper files: `ms-srv/CaddyCloudflareDockerfile`, `ms-srv/scripts/backup-to-s3.sh`
 
 ## Run
@@ -39,6 +39,8 @@ docker compose --env-file ms-srv/.env.example -f ms-srv/portainer-docker-compose
 - Environment variables are expected to be set in Portainer for real deployments.
 - `miniflux` uses the existing `postgresql` service on `ms-srv`.
 - Create the Miniflux database and user once in PostgreSQL before first start.
+- `feedtriage` connects to `miniflux` on the internal Docker network and persists state under `config/feedtriage/data`.
+- `feedtriage` requires Miniflux and Ollama-compatible API credentials; set the related variables in `ms-srv/.env.example` or in Portainer before starting it.
 - PostgreSQL is pinned to `postgres:18` and uses the PostgreSQL 18 volume layout.
 
 ## Env Files
@@ -48,11 +50,20 @@ docker compose --env-file ms-srv/.env.example -f ms-srv/portainer-docker-compose
 
 Each sample env file includes comments describing which variables are used by which services.
 
+For `feedtriage`, set these values at minimum:
+
+- `FEEDTRIAGE_FOCUS_TOPICS`
+- `FEEDTRIAGE_MINIFLUX_API_TOKEN`
+- `FEEDTRIAGE_SCREEN_OLLAMA_API_KEY`
+- `FEEDTRIAGE_REVIEW_OLLAMA_API_KEY`
+
+Set `FEEDTRIAGE_MINIFLUX_BASE_URL` only if FeedTriage should reach Miniflux somewhere other than `http://miniflux:8080`.
+
 ## Backup To S3
 
 Script:
 
-- [ms-srv/scripts/backup-to-s3.sh](/Users/mesutsoylu/Documents/Repos/mssrv-docker/ms-srv/scripts/backup-to-s3.sh)
+- [ms-srv/scripts/backup-to-s3.sh](/Users/mesutsoylu/Documents/Repos/homelab/ms-srv/scripts/backup-to-s3.sh)
 
 Requirements:
 

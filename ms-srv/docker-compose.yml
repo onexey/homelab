@@ -87,6 +87,22 @@ services:
     healthcheck:
       test: ["CMD", "/usr/bin/miniflux", "-healthcheck", "auto"]
 
+  feedtriage:
+    image: ghcr.io/onexey/feedtriage:latest
+    container_name: feedtriage
+    restart: unless-stopped
+    depends_on:
+      miniflux:
+        condition: service_healthy
+    environment:
+      FEEDTRIAGE__MINIFLUX__BASE_URL: ${FEEDTRIAGE_MINIFLUX_BASE_URL}
+      FEEDTRIAGE__FILTERING__FOCUS_TOPICS: ${FEEDTRIAGE_FOCUS_TOPICS}
+      FEEDTRIAGE__MINIFLUX__API_TOKEN: ${FEEDTRIAGE_MINIFLUX_API_TOKEN}
+      FEEDTRIAGE__AI__PROVIDERS__SCREEN_OLLAMA_SMALL__API_KEY: ${FEEDTRIAGE_SCREEN_OLLAMA_API_KEY}
+      FEEDTRIAGE__AI__PROVIDERS__REVIEW_OLLAMA_LARGE__API_KEY: ${FEEDTRIAGE_REVIEW_OLLAMA_API_KEY}
+    volumes:
+      - ${DataRootPath:-.}/config/feedtriage/data:/app/data
+
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
