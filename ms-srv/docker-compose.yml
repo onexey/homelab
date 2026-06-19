@@ -168,6 +168,7 @@ services:
     container_name: openclaw
     restart: unless-stopped
     command: ["node", "dist/index.js", "gateway", "run", "--allow-unconfigured"]
+    user: "${OPENCLAW_UID:-1000}:${OPENCLAW_GID:-999}"
     environment:
       OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
       OPENCLAW_CONFIG_DIR: /home/node/.openclaw
