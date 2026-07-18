@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+
+  # Docker (ms-srv)
+  - package-ecosystem: "docker"
+    directory: "/ms-srv"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "docker"
+
+  # Docker (ms-nas)
+  - package-ecosystem: "docker"
+    directory: "/ms-nas"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "docker"
