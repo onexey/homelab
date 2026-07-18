@@ -163,32 +163,6 @@ services:
       - ${DataRootPath:-.}/config/homebox/data:/data
     restart: unless-stopped
 
-  openclaw:
-    image: ghcr.io/openclaw/openclaw:latest
-    container_name: openclaw
-    restart: unless-stopped
-    command: ["node", "dist/index.js", "gateway", "run", "--allow-unconfigured"]
-    user: "${OPENCLAW_UID:-1000}:${OPENCLAW_GID:-1000}"
-    environment:
-      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
-      OPENCLAW_CONFIG_DIR: /home/node/.openclaw
-      OPENCLAW_WORKSPACE_DIR: /home/node/.openclaw/workspace
-      OPENCLAW_DISABLE_BONJOUR: "1"
-      NODE_COMPILE_CACHE: /var/tmp/openclaw-compile-cache
-      OPENCLAW_NO_RESPAWN: "1"
-    ports:
-      - "18789:18789"
-    volumes:
-      - ${DataRootPath:-.}/config/openclaw:/home/node/.openclaw
-      - ${DataRootPath:-.}/config/openclaw-secrets:/home/node/.config/openclaw
-      - openclaw-compile-cache:/var/tmp/openclaw-compile-cache
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:18789/healthz"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-
   instakindle:
     image: ghcr.io/onexey/instakindle:latest
     container_name: instakindle
@@ -206,6 +180,3 @@ services:
       SENDER_EMAIL: ${SENDER_EMAIL}
       POLL_INTERVAL: ${POLL_INTERVAL:-900}
       LOG_LEVEL: ${LOG_LEVEL:-info}
-
-volumes:
-  openclaw-compile-cache:
