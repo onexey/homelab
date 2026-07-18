@@ -1,0 +1,66 @@
+name: Validate Docker Compose Files
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          DOCKER_CONFIG=${HOME}/.docker
+          mkdir -p ${DOCKER_CONFIG}
+          docker compose version
+
+      - name: Validate ms-nas/docker-compose.yml
+        working-directory: ms-nas
+        run: docker compose -f docker-compose.yml config
+        env:
+          DataRootPath: /tmp/data
+          MediaRootPath: /tmp/media
+          InternalIP: 127.0.0.1
+
+      - name: Validate ms-srv/docker-compose.yml
+        working-directory: ms-srv
+        run: docker compose -f docker-compose.yml config
+        env:
+          DataRootPath: /tmp/data
+          InternalIP: 127.0.0.1
+          MSSQL_PASSWORD: dummy
+          POSTGRES_PASSWORD: dummy
+          MINIFLUX_DB_USER: dummy
+          MINIFLUX_DB_PASSWORD: dummy
+          MINIFLUX_DB_NAME: dummy
+          MINIFLUX_ADMIN_USERNAME: dummy
+          MINIFLUX_ADMIN_PASSWORD: dummy
+          FEEDTRIAGE__MINIFLUX__BASE_URL: http://dummy
+          FEEDTRIAGE__FILTERING__FOCUS_TOPICS: dummy
+          FEEDTRIAGE__MINIFLUX__API_TOKEN: dummy
+          FEEDTRIAGE__AI__PROVIDERS__SCREEN_OLLAMA_SMALL__API_KEY: dummy
+          FEEDTRIAGE__AI__PROVIDERS__REVIEW_OLLAMA_LARGE__API_KEY: dummy
+          WebPassword: dummy
+          CF_API_TOKEN: dummy
+          INSTAPAPER_KEY: dummy
+          INSTAPAPER_SECRET: dummy
+          INSTAPAPER_USERNAME: dummy
+          INSTAPAPER_PASSWORD: dummy
+          KINDLE_EMAIL: dummy@dummy.com
+          SMTP_HOST: dummy
+          SMTP_PORT: "587"
+          SMTP_USERNAME: dummy
+          SMTP_PASSWORD: dummy
+          SENDER_EMAIL: dummy@dummy.com
+          POLL_INTERVAL: "900"
+          LOG_LEVEL: info
+
+      - name: Validate ms-srv/portainer-docker-compose.yml
+        working-directory: ms-srv
+        run: docker compose -f portainer-docker-compose.yml config
+        env:
+          DataRootPath: /tmp/data
